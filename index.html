@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Подготовка к ЕГЭ по русскому</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #4285f4;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .login-btn {
+            background-color: white;
+            color: #4285f4;
+        }
+        .register-btn {
+            background-color: #34a853;
+            color: white;
+        }
+        .task-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .question {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .option {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .correct {
+            background-color: #e6f4ea;
+            border-color: #34a853;
+            color: #34a853;
+        }
+        .incorrect {
+            background-color: #fce8e6;
+            border-color: #d93025;
+            color: #d93025;
+        }
+        .explanation {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-left: 3px solid #4285f4;
+            display: none;
+        }
+        .profile {
+            display: none;
+        }
+        .teacher-dashboard {
+            display: none;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Подготовка к ЕГЭ по русскому</h1>
+        <div class="auth-buttons">
+            <button class="login-btn" onclick="openModal('login')">Вход</button>
+            <button class="register-btn" onclick="openModal('register')">Регистрация</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div id="task-section" class="task-container">
+            <div class="question" id="question-text">Загрузка вопроса...</div>
+            <div class="options" id="options-container"></div>
+            <div class="explanation" id="explanation"></div>
+        </div>
+
+        <div id="profile-section" class="profile">
+            <h2>Личный кабинет</h2>
+            <div id="user-info"></div>
+            <div id="teacher-key-section">
+                <input type="text" id="teacher-key-input" placeholder="Код учителя">
+                <button onclick="addTeacherKey()">Добавить учителя</button>
+            </div>
+            <div id="stats"></div>
+        </div>
+
+        <div id="teacher-dashboard" class="teacher-dashboard">
+            <h2>Панель учителя</h2>
+            <div id="students-list"></div>
+        </div>
+    </div>
+
+    <!-- Модальные окна -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <h2>Вход</h2>
+            <input type="text" id="login-email" placeholder="Email">
+            <input type="password" id="login-password" placeholder="Пароль">
+            <button onclick="login()">Войти</button>
+        </div>
+    </div>
+
+    <div id="register-modal" class="modal">
+        <div class="modal-content">
+            <h2>Регистрация</h2>
+            <input type="text" id="register-name" placeholder="Имя">
+            <input type="text" id="register-email" placeholder="Email">
+            <input type="password" id="register-password" placeholder="Пароль">
+            <select id="register-role">
+                <option value="student">Ученик</option>
+                <option value="teacher">Учитель</option>
+            </select>
+            <button onclick="register()">Зарегистрироваться</button>
+        </div>
+    </div>
+
+    <script>
+        // Данные для примера  
+        const questions = [
+            {
+                id: 1,
+                text: "В каком предложении оба выделенных слова пишутся слитно?",
+                options: [
+                    "ЧТО(БЫ) мне почитать, (НА)ПРИМЕР эту книгу?",
+                    "(ЗА)ТЕМ он встал и вышел, (НЕ)СМОТРЯ на просьбы остаться.",
+                    "(В)СЛЕДСТВИЕ дождя мы (ТОТ)ЧАС вернулись домой.",
+                    "(НА)ВСТРЕЧУ нам вышла собака, (ПО)ЭТОМУ мы остановились."
+                ],
+                correct: 1,
+                explanation: "Правильный ответ: ЗАТЕМ он встал и вышел, НЕСМОТРЯ на просьбы остаться. В этом предложении оба слова пишутся слитно: 'затем' — наречие, пишется слитно; 'несмотря' — предлог, пишется слитно с 'не'."
+            },
+            {
+                id: 2,
+                text: "В каком слове допущена ошибка в постановке ударения?",
+                options: [
+                    "договОр",
+                    "красИвее",
+                    "жалюзИ",
+                    "звонИт"
+                ],
+                correct: 0,
+                explanation: "Правильный ответ: 'договОр'. Правильное ударение — 'дОговор'."
+            }
+        ];
+
+        // Состояние приложения  
+        let currentUser = null;
+        let students = {};
+        let currentQuestionIndex = 0;
+        let userAnswers = {};
+
+        // DOM элементы  
+        const taskSection = document.getElementById('task-section');
+        const profileSection = document.getElementById('profile-section');
+        const teacherDashboard = document.getElementById('teacher-dashboard');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const explanation = document.getElementById('explanation');
+        const userInfo = document.getElementById('user-info');
+        const stats = document.getElementById('stats');
+        const studentsList = document.getElementById('students-list');
+
+        // Инициализация  
+        function init() {
+            loadQuestion();
+        }
+
+        // Загрузка вопроса  
+        function loadQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                currentQuestionIndex = 0;
+            }
+
+            const question = questions[currentQuestionIndex];
+            questionText.textContent = question.text;
+            optionsContainer.innerHTML = '';
+
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = option;
+                optionElement.onclick = () => selectOption(index, question.correct);
+                optionsContainer.appendChild(optionElement);
+            });
+
+            explanation.style.display = 'none';
+        }
+
+        // Выбор варианта ответа  
+        function selectOption(selectedIndex, correctIndex) {
+            const options = document.querySelectorAll('.option');
+            
+            options.forEach((option, index) => {
+                option.classList.remove('correct', 'incorrect');
+                if (index === correctIndex) {
+                    option.classList.add('correct');
+                } else if (index === selectedIndex && selectedIndex !== correctIndex) {
+                    option.classList.add('incorrect');
+                }
+            });
+
+            explanation.textContent = questions[currentQuestionIndex].explanation;
+            explanation.style.display = 'block';
+
+            // Сохраняем ответ пользователя  
+            if (currentUser) {
+                if (!userAnswers[currentUser.email]) {
+                    userAnswers[currentUser.email] = [];
+                }
+                userAnswers[currentUser.email].push({
+                    questionId: questions[currentQuestionIndex].id,
+                    isCorrect: selectedIndex === correctIndex  
+                });
+
+                // Обновляем статистику  
+                updateStats();
+            }
+
+            // Переходим к следующему вопросу через 3 секунды  
+            setTimeout(() => {
+                currentQuestionIndex++;
+                loadQuestion();
+            }, 3000);
+        }
+
+        // Модальные окна  
+        function openModal(type) {
+            if (type === 'login') {
+                document.getElementById('login-modal').style.display = 'block';
+            } else if (type === 'register') {
+                document.getElementById('register-modal').style.display = 'block';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('login-modal').style.display = 'none';
+            document.getElementById('register-modal').style.display = 'none';
+        }
+
+        // Регистрация  
+        function register() {
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const role = document.getElementById('register-role').value;
+
+            if (!name || !email || !password) {
+                alert('Пожалуйста, заполните все поля');
+                return;
+            }
+
+            currentUser = {
+                name,
+                email,
+                role,
+                teacherKey: role === 'teacher' ? generateTeacherKey() : null  
+            };
+
+            if (role === 'student') {
+                students[email] = {
+                    name,
+                    answers: []
+                };
+            }
+
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            updateUI();
+            closeModal();
+
+            if (role === 'teacher') {
+                alert(`Вы зарегистрированы как учитель. Ваш код для учеников: ${currentUser.teacherKey}`);
+            }
+        }
+
+        // Вход  
+        function login() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            // В реальном приложении здесь была бы проверка с сервером  
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if (user && user.email === email) {
+                currentUser = user;
+                updateUI();
+                closeModal();
+            } else {
+                alert('Неверный email или пароль');
+            }
+        }
+
+        // Генерация кода учителя  
+        function generateTeacherKey() {
+            return 'TEACH-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+        }
+
+        // Добавление кода учителя  
+        function addTeacherKey() {
+            const key = document.getElementById('teacher-key-input').value;
+            if (key && key.startsWith('TEACH-')) {
+                currentUser.teacher = key;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                alert('Учитель успешно добавлен');
+                updateUI();
+            } else {
+                alert('Неверный код учителя');
+            }
+        }
+
+        // Обновление UI в зависимости от роли пользователя  
+        function updateUI() {
+            if (!currentUser) {
+                taskSection.style.display = 'block';
+                profileSection.style.display = 'none';
+                teacherDashboard.style.display = 'none';
+                return;
+            }
+
+            userInfo.innerHTML = `
+                <p>Имя: ${currentUser.name}</p>
+                <p>Email: ${currentUser.email}</p>
+                <p>Роль: ${currentUser.role === 'teacher' ? 'Учитель' : 'Ученик'}</p>
+            `;
+
+            if (currentUser.role === 'teacher') {
+                taskSection.style.display = 'none';
+                profileSection.style.display = 'none';
+                teacherDashboard.style.display = 'block';
+                updateStudentsList();
+            } else {
+                taskSection.style.display = 'block';
+                profileSection.style.display = 'block';
+                teacherDashboard.style.display = 'none';
+                updateStats();
+            }
+        }
+
+        // Обновление статистики  
+        function updateStats() {
+            if (!currentUser || currentUser.role !== 'student') return;
+
+            const answers = userAnswers[currentUser.email] || [];
+            const correctCount = answers.filter(a => a.isCorrect).length;
+            const totalCount = answers.length;
+            const accuracy = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
+
+            stats.innerHTML = `
+                <h3>Статистика</h3>
+                <p>Всего отвечено: ${totalCount}</p>
+                <p>Правильных ответов: ${correctCount}</p>
+                <p>Точность: ${accuracy}%</p>
+            `;
+        }
+
+        // Обновление списка студентов для учителя  
+        function updateStudentsList() {
+            if (!currentUser || currentUser.role !== 'teacher') return;
+
+            studentsList.innerHTML = '<h3>Мои ученики</h3>';
+
+            for (const [email, student] of Object.entries(students)) {
+                const studentAnswers = userAnswers[email] || [];
+                const correctCount = studentAnswers.filter(a => a.isCorrect).length;
+                const totalCount = studentAnswers.length;
+                const accuracy = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
+
+                const studentElement = document.createElement('div');
+                studentElement.innerHTML = `
+                    <p><strong>${student.name}</strong> (${email})</p>
+                    <p>Ответов: ${totalCount}, правильных: ${correctCount} (${accuracy}%)</p>
+                `;
+                studentsList.appendChild(studentElement);
+            }
+        }
+
+        // Проверяем, есть ли сохраненный пользователь  
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+            currentUser = JSON.parse(savedUser);
+        }
+
+        window.onload = function() {
+            init();  
+            updateUI();
+        };
+
+        // Закрытие модального окна при клике вне его  
+        window.onclick = function(event) {
+            if (event.target.className === 'modal') {
+                closeModal();
+            }
+        };
+    </script>
+</body>
+</html>
